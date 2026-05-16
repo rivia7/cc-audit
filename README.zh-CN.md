@@ -2,59 +2,61 @@
 
 [English](README.md) · **简体中文** · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-一个 [Claude Code](https://claude.com/claude-code) 技能:对照 Anthropic 公开的
-大型代码库最佳实践审计你的仓库,产出一份**带评分的只读 Markdown 合规报告**——
-逐项给出状态、来自仓库的具体证据,以及按优先级排序的改进清单。
+一个 [Claude Code](https://claude.com/claude-code) 技能:检查你的仓库为 Claude
+Code 配置得好不好,产出一份带评分的只读报告。
 
-对照标准:博客《[How Claude Code works in large codebases: best practices and
-where to start](https://claude.com/blog/how-claude-code-works-in-large-codebases-best-practices-and-where-to-start)》。
+它对照 Anthropic 的指南
+[《How Claude Code works in large codebases》](https://claude.com/blog/how-claude-code-works-in-large-codebases-best-practices-and-where-to-start)
+给你的配置打分,每条结论都附上仓库里的实际证据,并告诉你该先修哪儿。它不动你的
+代码——唯一写出的东西就是那份报告。
 
-## 它做什么
+## 你会得到什么
 
-对一个项目,技能会盘点全部 Claude Code 配置物料,并按博客指引对九大类打分:
+把它指向一个项目,它会盘点全部 Claude Code 配置物料,然后给九个方面评级:
 
-| # | 类别 |
+| 方面 | 看什么 |
 |---|---|
-| 1 | CLAUDE.md 层级与精简度 |
-| 2 | 文件组织与导航(`.claudeignore`、作用域命令、代码库地图) |
-| 3 | Hooks(确定性检查、启动/结束上下文) |
-| 4 | Skills(渐进式披露、路径作用域) |
-| 5 | MCP 服务 |
-| 6 | LSP / 代码智能 |
-| 7 | Subagent 工作流约定 |
-| 8 | Plugins / 分发 |
-| 9 | 配置维护节奏 |
+| CLAUDE.md | 分层结构,是否精简(只放指针和坑,不堆噪音) |
+| 文件组织 | `.claudeignore`、作用域命令、代码库地图 |
+| Hooks | 确定性检查,启动/结束时加载上下文 |
+| Skills | 渐进式披露,路径作用域 |
+| MCP 服务 | 是否接入内部工具与结构化搜索 |
+| LSP / 代码智能 | 规模化下的符号级导航 |
+| Subagent | 探索与编辑分离的约定 |
+| Plugins | 是否打包分发,而非停留在个人经验 |
+| 维护 | 是否有评审节奏;过时规则是否清理 |
 
-每项标记 `✓ 符合` / `⚠ 部分` / `✗ 缺失` / `N/A`,均附具体证据,并汇总为
-0–100 分及等级(优秀 ≥85 · 良好 70–84 · 需改进 50–69 · 起步 <50)。
+每项评为 `✓ 符合`、`⚠ 部分`、`✗ 缺失` 或 `N/A`,并附上判定依据。各项汇总为
+0–100 分及等级:**优秀**(≥85)、**良好**(70–84)、**需改进**(50–69)、
+**起步**(<50)。
 
-核心设计取舍:
+这份报告凭什么值得一看:
 
-- **按项目规模校准。** 单文件小工具不会因为没有 CLAUDE.md 层级或插件市场被扣分
-  ——真正不适用的实践会标为 `N/A`(并给出理由)、不计入评分,而非按失败处理。
-- **只读。** 绝不修改你的项目。唯一产出是写在项目根目录的报告文件
+- **标准随项目规模浮动。** 单文件脚本不会因为没有 CLAUDE.md 层级或插件市场被扣
+  分。真正不适用的实践会标为 `N/A` 并给出理由、不计入评分,而不是当成失败。
+- **只读。** 绝不修改你的项目。唯一产出是仓库根目录下的
   `claude-code-audit-<YYYY-MM-DD>.md`。
-- **组织治理单列。** 单个仓库无法证明的条目(配置 DRI、托管 marketplace、
-  评审节奏等)以"需人工确认"清单呈现,不计分。
-- **先证据,后结论。** 每条发现都引用文件路径、行数或原文片段。
+- **组织级条目单独列。** 仓库自身证明不了的东西——配置负责人、托管市场、评审
+  节奏——放进一份交给人确认的清单,不影响评分。
+- **先给证据,再下结论。** 每条结论都引用路径、行数或原文片段。
 
-## 仓库结构
+## 目录结构
 
 ```
-cc-audit/                 # 可安装的技能(即本子目录)
-├── SKILL.md              # 工作流 + 报告模板 + 评分规则
+cc-audit/                 # 技能本体(即本子目录)
+├── SKILL.md              # 工作流、报告模板、评分规则
 ├── references/
-│   └── checklist.md      # 逐类别审计标准 + 博客原文要点
+│   └── checklist.md      # 各方面判定标准与来源指南
 ├── scripts/
-│   └── discover.sh       # 一键盘点全部 Claude Code 配置
+│   └── discover.sh       # 一次性盘点 Claude Code 配置
 └── evals/
-    └── evals.json        # 用于验证技能的测试场景与断言
-README.md                 # 本文件(及 zh-CN / ja / ko 译本)
+    └── evals.json        # 用于验证技能的测试场景
+README.md                 # 你在这里(译本:zh-CN、ja、ko)
 ```
 
 ## 安装
 
-**全局(对你所有项目生效):**
+全局安装,对你所有项目生效:
 
 ```bash
 git clone https://github.com/rivia7/cc-audit.git
@@ -62,42 +64,38 @@ cp -R cc-audit/cc-audit ~/.claude/skills/cc-audit
 chmod +x ~/.claude/skills/cc-audit/scripts/discover.sh
 ```
 
-**单项目:**
+或者只装到某个仓库:
 
 ```bash
-cp -R cc-audit ./你的仓库/.claude/skills/cc-audit
+cp -R cc-audit your-repo/.claude/skills/cc-audit
 ```
 
-安装后请新开一个 Claude Code 会话以便发现该技能。
+然后新开一个 Claude Code 会话,让它识别到这个技能。
 
-## 使用
+## 用法
 
-为确保可靠激活,请**显式调用**:
+点名调用——这是最稳的运行方式:
 
 > 用 cc-audit 技能审计这个仓库。
->
-> 对照 Claude Code 工程规范审计当前项目并给我一份报告。
 
-报告会写入 `<项目根>/claude-code-audit-<YYYY-MM-DD>.md`,并在回复中总结最高优先级
-的改进项。
+报告会写到 `<仓库>/claude-code-audit-<YYYY-MM-DD>.md`,最高优先级的改进项会在
+回复里给你总结。
 
-### 关于触发
+**为什么要点名?** 遇到「审计我的配置」这类请求,能力强的模型往往自己直接看了,
+而不去调用技能——这是 Claude 的已知习性,不是这里的缺陷。好处是它绝不会在不该
+触发时触发(测试中对相似干扰提示零误触发)。所以请显式调用;一旦跑起来,审计
+质量是稳定的。
 
-"审计我的配置"这类请求的自动触发存在结构性上限——能力强的模型往往直接内联做一次
-即兴检查,而不去调用技能。这是 Claude 的已知行为,并非本技能的缺陷。测试中该描述
-从未误触发(近义陷阱用例上 precision 100%),因此可靠路径是**显式调用**(斜杠提及
-或"用 cc-audit 技能")。一旦被调用,技能的审计质量是稳定的。
+## 不在范围内
 
-## 它不做什么
-
-- 不修复、不脚手架——只出报告。需要落地修复请另行提出。
-- 组织/治理条目仅为建议、需人工确认;仓库无法证明这些。
+- 它只报告,不修复。需要落地修改请另外说。
+- 组织与治理类条目是交给人确认的建议——仓库证明不了这些。
 
 ## 开发
 
-`cc-audit/scripts/discover.sh <路径>` 打印原始物料清单。
-`cc-audit/evals/evals.json` 收录了用于验证规模校准、质量判断、只读保证以及
-"不无中生有"行为的场景(无配置 / 臃肿 monorepo / 精简单文件 / 配置完善)。
+运行 `cc-audit/scripts/discover.sh <路径>` 可打印原始物料清单。
+`cc-audit/evals/evals.json` 收录了用于验证的四个场景——无配置、臃肿 monorepo、
+精简单文件、配置完善——覆盖规模校准、质量判断、只读保证,以及「不无中生有」。
 
 ## Star History
 

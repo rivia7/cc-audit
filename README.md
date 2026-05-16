@@ -2,66 +2,66 @@
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-A [Claude Code](https://claude.com/claude-code) skill that audits a repository
-against Anthropic's published best practices for working in large codebases and
-produces a **scored, read-only Markdown compliance report** — with per-item
-status, concrete evidence from the repo, and a prioritized fix list.
+A [Claude Code](https://claude.com/claude-code) skill that checks how well a
+repository is set up for Claude Code and writes a scored, read-only report.
 
-Reference standard: *["How Claude Code works in large codebases: best practices
-and where to start"](https://claude.com/blog/how-claude-code-works-in-large-codebases-best-practices-and-where-to-start)*.
+It grades your setup against Anthropic's guide
+[*How Claude Code works in large codebases*](https://claude.com/blog/how-claude-code-works-in-large-codebases-best-practices-and-where-to-start),
+backs every finding with concrete evidence, and tells you what to fix first. It
+never touches your code — the only thing it writes is the report.
 
-## What it does
+## What you get
 
-Given a project, the skill inventories every Claude Code artifact and grades
-nine categories against the blog's guidance:
+Point it at a project. It inventories every Claude Code artifact, then grades
+nine areas:
 
-| # | Category |
+| Area | What it looks at |
 |---|---|
-| 1 | CLAUDE.md hierarchy & leanness |
-| 2 | File organization & navigation (`.claudeignore`, scoped commands, codebase map) |
-| 3 | Hooks (deterministic checks, start/stop context) |
-| 4 | Skills (progressive disclosure, path scoping) |
-| 5 | MCP servers |
-| 6 | LSP / code intelligence |
-| 7 | Subagent workflow conventions |
-| 8 | Plugins / distribution |
-| 9 | Configuration maintenance cadence |
+| CLAUDE.md | Layered hierarchy, kept lean (pointers and gotchas, not noise) |
+| File organization | `.claudeignore`, scoped commands, a codebase map |
+| Hooks | Deterministic checks, start/stop context loading |
+| Skills | Progressive disclosure, path scoping |
+| MCP servers | Internal tools and structured search wired in |
+| LSP / code intelligence | Symbol-level navigation at scale |
+| Subagents | Explore-then-edit conventions |
+| Plugins | Packaged and distributed, not tribal |
+| Maintenance | A review cadence; stale rules removed |
 
-Each item is marked `✓ Compliant` / `⚠ Partial` / `✗ Missing` / `N/A`, backed
-by concrete evidence, and rolled up into a 0–100 score with bands
-(优秀 ≥85 · 良好 70–84 · 需改进 50–69 · 起步 <50).
+Each item is rated `✓ Compliant`, `⚠ Partial`, `✗ Missing`, or `N/A`, with the
+evidence behind it. Items roll up into a 0–100 score and a band: **Excellent**
+(≥85), **Good** (70–84), **Needs work** (50–69), or **Early** (<50).
 
-Key design choices:
+What makes the report worth reading:
 
-- **Calibrated to project scale.** A tiny single-file tool is not penalized for
-  lacking a CLAUDE.md hierarchy or a plugin marketplace — genuinely
-  inapplicable practices are marked `N/A` (with a reason) and excluded from the
-  score, not scored as failures.
-- **Read-only.** It never modifies your project. Its only output is the report
-  file `claude-code-audit-<YYYY-MM-DD>.md` written at the project root.
-- **Organizational governance is separated.** Items a single repo cannot prove
-  (DRI ownership, managed marketplace, review cadence, etc.) are surfaced as a
-  human-confirmation checklist, not scored.
-- **Evidence first, verdict second.** Every finding cites a file path, line
-  count, or quoted snippet.
+- **The bar scales to your project.** A single-file script isn't marked down
+  for having no CLAUDE.md hierarchy or plugin marketplace. Practices that
+  genuinely don't apply are `N/A` with a reason and left out of the score,
+  not counted as failures.
+- **It's read-only.** Your project is never modified. The one output is
+  `claude-code-audit-<YYYY-MM-DD>.md` at the repo root.
+- **Org-level items stay separate.** Things a repo can't prove on its own — a
+  config owner, a managed marketplace, a review cadence — go in a checklist
+  for a human to confirm, and don't affect the score.
+- **Evidence comes before the verdict.** Every finding quotes a path, a line
+  count, or a snippet.
 
-## Repository layout
+## Layout
 
 ```
-cc-audit/                 # the installable skill (this subdirectory)
-├── SKILL.md              # workflow + report template + scoring rubric
+cc-audit/                 # the skill itself (this subdirectory)
+├── SKILL.md              # workflow, report template, scoring rubric
 ├── references/
-│   └── checklist.md      # per-category audit criteria + verbatim blog points
+│   └── checklist.md      # per-area criteria and the source guidance
 ├── scripts/
-│   └── discover.sh       # one-shot inventory of all Claude Code config
+│   └── discover.sh       # one-shot inventory of Claude Code config
 └── evals/
-    └── evals.json        # test scenarios + assertions used to validate the skill
-README.md                 # this file (+ zh-CN / ja / ko translations)
+    └── evals.json        # scenarios used to validate the skill
+README.md                 # you are here (translations: zh-CN, ja, ko)
 ```
 
 ## Install
 
-**Global (all your projects):**
+Globally, for every project you work on:
 
 ```bash
 git clone https://github.com/rivia7/cc-audit.git
@@ -69,49 +69,42 @@ cp -R cc-audit/cc-audit ~/.claude/skills/cc-audit
 chmod +x ~/.claude/skills/cc-audit/scripts/discover.sh
 ```
 
-**Per-project:**
+Or just for one repo:
 
 ```bash
-cp -R cc-audit ./your-repo/.claude/skills/cc-audit
+cp -R cc-audit your-repo/.claude/skills/cc-audit
 ```
 
-Start a new Claude Code session so the skill is discovered.
+Then start a fresh Claude Code session so it picks up the skill.
 
 ## Usage
 
-Invoke it **explicitly** for reliable activation:
+Ask for it by name — that's the reliable way to run it:
 
 > Use the cc-audit skill to audit this repository.
->
-> Audit the current project against Claude Code engineering best practices and
-> give me a report.
 
-The report is written to `<project-root>/claude-code-audit-<YYYY-MM-DD>.md` and
-the top fixes are summarized in the reply.
+You'll get the report at `<repo>/claude-code-audit-<YYYY-MM-DD>.md`, with the
+highest-priority fixes summarized in the reply.
 
-### A note on triggering
+**Why ask by name?** For "audit my setup" requests, a capable model tends to
+just review things itself instead of reaching for a skill — a known Claude
+trait, not a flaw here. The upside: it never fires when it shouldn't (zero
+false triggers on look-alike prompts in testing). So invoke it explicitly;
+once it runs, the audit is consistent.
 
-Auto-triggering for "audit my setup" requests is structurally limited — a
-capable model often just does an ad-hoc review inline instead of consulting a
-skill. This is a known Claude behavior, not a defect of this skill. In testing,
-the description never false-triggered (100% precision on near-miss queries), so
-the reliable path is **explicit invocation** (a slash mention or "use the
-cc-audit skill"). When invoked, the skill's audit quality is consistent.
+## Not in scope
 
-## What it does not do
-
-- It does not fix or scaffold anything — it reports. Ask separately if you want
-  the fixes applied.
-- Organizational/governance items are advisory and need human confirmation; a
-  repo cannot prove them.
+- It reports; it doesn't fix. Ask separately if you want the changes made.
+- Org and governance items are advice for a human to confirm — a repo can't
+  prove them.
 
 ## Development
 
-`cc-audit/scripts/discover.sh <path>` prints the raw artifact inventory.
-`cc-audit/evals/evals.json` holds the scenarios (no-config, bloated monorepo,
-lean single-file, well-configured) used to validate calibration, quality
-judgment, the read-only guarantee, and the "don't manufacture problems"
-behavior.
+Run `cc-audit/scripts/discover.sh <path>` to print the raw inventory.
+`cc-audit/evals/evals.json` holds the four scenarios used to validate the
+skill — no config, a bloated monorepo, a lean single file, and a
+well-configured repo — covering scale calibration, quality judgment, the
+read-only guarantee, and not inventing problems.
 
 ## Star History
 
