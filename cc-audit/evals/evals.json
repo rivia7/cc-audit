@@ -1,0 +1,76 @@
+{
+  "skill_name": "cc-audit",
+  "notes": "Baseline = no skill (creating a new skill). Each eval points at a fixture copied into iteration-N/<name>/<cfg>/project. Prompts are Chinese; the skill must localize the report to the conversation language. Assertions are graded against the produced report file + the post-run state of project/.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "no-config-detect-and-roadmap",
+      "prompt": "帮我看下 project/ 这个服务,我们准备让团队都用 Claude Code,但还没做任何配置。它符合 Claude Code 工程规范吗?给个评估。",
+      "expected_output": "Markdown audit report. Correctly reports NO Claude Code config (no CLAUDE.md/.claude/hooks/skills/MCP). Low band but constructive starting-point roadmap, not scolding. Org-level human-confirm section present. project/ untouched.",
+      "files": [],
+      "assertions": [
+        {"id": "A1", "text": "An audit report Markdown file was produced in outputs/ and is substantive (not a stub: has a score, category breakdown, and recommendations)."},
+        {"id": "A2", "text": "Correctly detects total absence of Claude Code config — explicitly states there is no CLAUDE.md, no .claude/ directory, and no hooks/skills/MCP."},
+        {"id": "A3", "text": "The summary is framed as a constructive starting-point roadmap (where to begin), not as a scolding or pure list of failures."},
+        {"id": "A4", "text": "Includes the organizational-governance human-confirm checklist section (the items a single repo cannot prove)."},
+        {"id": "A5", "text": "No file inside project/ was created, modified, or deleted (report is read-only; report written to outputs/, not into project/)."},
+        {"id": "A6", "text": "Reports an overall score in the lowest band (起步 / <50) consistent with zero configuration."},
+        {"id": "A7", "text": "Top-priority recommendations name concrete first artifacts to add (at minimum a root CLAUDE.md), in a sensible starting order."}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "quality-judgment-bloated-monorepo",
+      "prompt": "审计一下 project/ 是否符合 Claude Code 大型代码库最佳实践,我感觉我们的 CLAUDE.md 有点乱但说不上来哪里有问题。",
+      "expected_output": "Audit that judges quality, not mere presence. Flags CLAUDE.md bloat, misplaced reusable domain knowledge, obsolete compensatory rule, missing subdir CLAUDE.md, linters-without-hooks, missing ignore, vague skill. project/ untouched.",
+      "files": [],
+      "assertions": [
+        {"id": "B1", "text": "A substantive audit report Markdown file was produced in outputs/."},
+        {"id": "B2", "text": "Flags root CLAUDE.md bloat — calls out the generic software-engineering / JavaScript advice as noise the model already knows."},
+        {"id": "B3", "text": "Identifies the long OAuth/authentication section as reusable domain knowledge that belongs in a Skill, not in CLAUDE.md."},
+        {"id": "B4", "text": "Flags the 'edit one file at a time / no multi-file refactor' rule as a likely obsolete old-model compensatory rule that should be removed."},
+        {"id": "B5", "text": "Flags that this multi-service repo (services/api, services/web) has no subdirectory CLAUDE.md scoping."},
+        {"id": "B6", "text": "Flags that eslint+prettier are configured but no hook enforces these deterministic checks."},
+        {"id": "B7", "text": "Flags generated/vendored dirs (dist/, services/web/build, node_modules) with no .claudeignore / exclusion configuration."},
+        {"id": "B8", "text": "Flags the 'helper' skill's vague, non-triggering description as weak."},
+        {"id": "B9", "text": "Does not blanket-reward presence — settings.json and the skill existing are not marked fully Compliant given their quality problems."},
+        {"id": "B10", "text": "No file inside project/ was created, modified, or deleted."}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "calibration-lean-small-project",
+      "prompt": "这个小工具 project/ 就一个单文件脚本,帮我对照 Claude Code 规范检查下配置到不到位。",
+      "expected_output": "Audit calibrated to a tiny single-file project: short lean CLAUDE.md judged good; hierarchy/plugins/MCP/subagents marked N/A not ✗; score in 良好/优秀 band; org-level section present; project/ untouched.",
+      "files": [],
+      "assertions": [
+        {"id": "C1", "text": "A substantive audit report Markdown file was produced in outputs/."},
+        {"id": "C2", "text": "The short ~8-line root CLAUDE.md is judged good/Compliant (lean = pointers + a real gotcha), NOT marked Missing/Partial merely for being short."},
+        {"id": "C3", "text": "Subdirectory CLAUDE.md hierarchy is marked N/A (with a scale reason), not ✗ Missing."},
+        {"id": "C4", "text": "At least two of {plugins/marketplace, subagent conventions, MCP} are marked N/A for project scale rather than ✗ Missing."},
+        {"id": "C5", "text": "Overall score lands in the 良好 or 优秀 band — not artificially tanked for lacking org-scale machinery."},
+        {"id": "C6", "text": "The organizational-governance human-confirm checklist section is still present."},
+        {"id": "C7", "text": "No file inside project/ was created, modified, or deleted."}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "well-configured-no-false-problems",
+      "prompt": "我们这个平台仓库 project/ 配置 Claude Code 已经折腾挺久了,帮我做一次完整的工程规范合规审计,看还有没有漏的。",
+      "expected_output": "Audit recognizes a strong setup without manufacturing problems: layered CLAUDE.md, hooks incl. self-improvement, path-scoped skill, MCP, ignore, recent git all Compliant; 优秀 band; org section present; project/ untouched.",
+      "files": [],
+      "assertions": [
+        {"id": "D1", "text": "A substantive audit report Markdown file was produced in outputs/."},
+        {"id": "D2", "text": "Recognizes the layered CLAUDE.md (root pointers + services/api + services/web) as Compliant."},
+        {"id": "D3", "text": "Recognizes the hooks setup including the Stop/reflect self-improvement hook as Compliant."},
+        {"id": "D4", "text": "Recognizes the path-scoped security-review skill (good description + allowed-paths) as Compliant."},
+        {"id": "D5", "text": "Recognizes .mcp.json and .claudeignore as Compliant."},
+        {"id": "D6", "text": "Uses git recency (~7 days) to judge configuration maintenance as recent/Compliant."},
+        {"id": "D7", "text": "Overall score is in the 优秀 band (>=85)."},
+        {"id": "D8", "text": "Does not fabricate false ✗ findings — does not claim missing artifacts that actually exist in the repo."},
+        {"id": "D9", "text": "The organizational-governance human-confirm checklist section is still present."},
+        {"id": "D10", "text": "No file inside project/ was created, modified, or deleted."}
+      ]
+    }
+  ]
+}
