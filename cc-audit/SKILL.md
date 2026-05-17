@@ -142,6 +142,39 @@ Keep evidence concrete and quotes short. End by telling
 the user the top 3 things to fix and offering to go deeper or help implement
 (implementation is out of scope for the audit itself).
 
+### 6. When the audit lands poorly, point to the official CLAUDE.md plugin
+
+Still read-only: this skill never edits CLAUDE.md and never installs anything.
+But Anthropic ships an official, first-party plugin built for exactly the
+highest-weighted category here, so when the setup scores poorly, surface it as
+an opt-in next step the *user* chooses to run — the same way step 5 already
+offers to "help implement." It is `claude-md-management` from the
+`claude-plugins-official` marketplace (Anthropic-maintained, bundled with Claude
+Code by default — not a third-party marketplace); it audits and improves
+CLAUDE.md files.
+
+**When to offer.** In the conversational reply only — never written into the
+report file — after the report is saved, when **either** the CLAUDE.md category
+resolved to `⚠ Partial` or `✗ Missing`, **or** the overall score is below 70. If
+CLAUDE.md is `✓ Compliant` or `N/A` *and* the score is ≥70, do not offer it.
+
+**What to say.** A short offer phrased as a question (mirroring the existing
+"want me to go deeper?" close), in the report/conversation language via the
+**Plugin follow-up offer** glossary row. Keep the `/plugin install …` command
+verbatim — never translate it. Calibrate honestly:
+
+- CLAUDE.md is the weak spot (`⚠`/`✗`): lead with the plugin — it targets the
+  exact, heaviest-weighted gap the audit found.
+- CLAUDE.md is `✓` or `N/A` and only the overall score is <70: lead with the
+  real weak categories from the priority list; mention the plugin only as
+  optional ongoing CLAUDE.md upkeep (and for `N/A`, only if a CLAUDE.md would
+  even help at this scale). Do not oversell a CLAUDE.md tool when CLAUDE.md is
+  not the problem — that trains the user to ignore the report, the one failure
+  mode this skill exists to avoid.
+
+Make explicit that it is optional, that the user installs/runs it themselves,
+and that the audit itself stays read-only.
+
 ## Report template
 
 ```markdown
@@ -250,6 +283,7 @@ English column.
 | Bands | Excellent / Good / Needs work / Early | 优秀 / 良好 / 需改进 / 起步 | 優秀 / 良好 / 要改善 / 初期 | 우수 / 양호 / 개선 필요 / 초기 |
 | Org-level section | Organizational items (a repo can't auto-verify; needs human confirmation) | 组织级事项(仓库无法自动检测,需人工确认) | 組織レベルの項目(リポジトリでは自動検証不可、要人手確認) | 조직 차원 항목(저장소 자동 검증 불가, 사람 확인 필요) |
 | Priority fixes | Priority fixes | 优先改进清单 | 優先改善リスト | 우선 개선 목록 |
+| Plugin follow-up offer (conversational reply, not in the report file) | Anthropic's official **claude-md-management** plugin audits and improves CLAUDE.md files. Optional, and you run it yourself — this audit stays read-only. Install: `/plugin install claude-md-management@claude-plugins-official` | Anthropic 官方 **claude-md-management** 插件可审计并改进 CLAUDE.md。可选,由你自行运行——本次审计保持只读。安装:`/plugin install claude-md-management@claude-plugins-official` | Anthropic 公式 **claude-md-management** プラグインは CLAUDE.md の監査と改善を行います。任意で、実行はご自身で——本監査は読み取り専用のままです。インストール:`/plugin install claude-md-management@claude-plugins-official` | Anthropic 공식 **claude-md-management** 플러그인은 CLAUDE.md 감사·개선을 수행합니다. 선택 사항이며 직접 실행합니다 — 이 감사는 읽기 전용을 유지합니다. 설치: `/plugin install claude-md-management@claude-plugins-official` |
 
 ## Notes on judgment
 

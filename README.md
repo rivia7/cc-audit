@@ -95,6 +95,9 @@ once it runs, the audit is consistent.
 ## Not in scope
 
 - It reports; it doesn't fix. Ask separately if you want the changes made.
+- When CLAUDE.md is the weak spot (or the overall score is below 70), the
+  reply points you to Anthropic's official `claude-md-management` plugin as
+  an optional next step you run yourself — the audit itself stays read-only.
 - Org and governance items are advice for a human to confirm — a repo can't
   prove them.
 

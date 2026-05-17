@@ -89,6 +89,8 @@ cp -R cc-audit your-repo/.claude/skills/cc-audit
 ## 不在范围内
 
 - 它只报告,不修复。需要落地修改请另外说。
+- 当 CLAUDE.md 是薄弱点(或总分低于 70)时,回复会向你指出 Anthropic 官方的
+  `claude-md-management` 插件,作为可选的下一步、由你自行运行——审计本身保持只读。
 - 组织与治理类条目是交给人确认的建议——仓库证明不了这些。
 
 ## 开发
