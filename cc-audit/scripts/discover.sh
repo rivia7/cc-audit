@@ -25,6 +25,32 @@ echo "Claude Code artifact inventory"
 echo "Project root: $ROOT"
 echo "Generated:    $(date +%Y-%m-%d)"
 
+# --- user locale (report-language fallback; conversation language wins) ---
+section "USER LOCALE"
+_loc=""
+if [ "$(uname -s)" = "Darwin" ] && command -v defaults >/dev/null 2>&1; then
+  _langs="$(defaults read -g AppleLanguages 2>/dev/null | tr -d ' \n"()')"
+  _first="${_langs%%,*}"
+  [ -n "$_first" ] && note "macOS AppleLanguages[0]: $_first"
+  _aploc="$(defaults read -g AppleLocale 2>/dev/null || true)"
+  [ -n "${_aploc:-}" ] && note "macOS AppleLocale: $_aploc"
+  _loc="${_first:-${_aploc:-}}"
+fi
+_envloc="${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}"
+[ -n "$_envloc" ] && note "env LC_ALL/LC_MESSAGES/LANG: $_envloc"
+[ -z "$_loc" ] && _loc="$_envloc"
+_lc="$(printf '%s' "$_loc" | tr 'A-Z' 'a-z')"
+case "$_lc" in
+  zh-hant*|zh_tw*|zh-tw*|zh_hk*|zh-hk*) _lang="Traditional Chinese (繁體中文)";;
+  zh*)                                  _lang="Simplified Chinese (简体中文)";;
+  ja*)                                  _lang="Japanese (日本語)";;
+  ko*)                                  _lang="Korean (한국어)";;
+  ""|c|posix|en*)                       _lang="English";;
+  *)                                    _lang="English (locale '$_lc' unmapped)";;
+esac
+note "Detected system language: $_lang"
+note "Report-language precedence: explicit user request > conversation language > this system language > English"
+
 # --- git context ----------------------------------------------------------
 section "GIT CONTEXT"
 if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then

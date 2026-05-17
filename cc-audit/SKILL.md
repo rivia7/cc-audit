@@ -69,7 +69,9 @@ bash <skill-path>/scripts/discover.sh <project-root>
 It prints an inventory: every `CLAUDE.md` (with line counts), `.claude/` tree,
 `settings.json` / `settings.local.json`, ignore configuration, `.mcp.json`,
 skills, slash commands, hooks, plugin/marketplace files, related `AGENTS.md`, and
-git-recency signals for the config. Read its output, then open the specific files
+git-recency signals for the config, plus a `USER LOCALE` section (detected
+system language — used only as a report-language fallback, see step 5). Read its
+output, then open the specific files
 you need to actually judge quality (e.g. read the root `CLAUDE.md` to assess
 whether it's lean, skim subdirectory ones, look at `settings.json` permissions).
 The script gathers facts; *you* make the judgments — don't grade from filenames
@@ -110,17 +112,33 @@ aren't entirely N/A, and renormalize to 100 over the ones that apply):
 | Configuration maintenance cadence | 10 |
 
 Map status to fraction of the category's weight: `✓`=1.0, `⚠`=0.5, `✗`=0.0.
-Bands: **优秀 ≥85 · 良好 70–84 · 需改进 50–69 · 起步 <50**. Organizational
+Bands (render in the chosen language — English canonical / 简体中文 default):
+**Excellent/优秀 ≥85 · Good/良好 70–84 · Needs work/需改进 50–69 ·
+Early/起步 <50**. Organizational
 governance is *not* in the numeric score (a repo can't prove it) — it's a
 separate human-confirmation checklist.
 
 ### 5. Write the report
 
 Write the report to `<project-root>/claude-code-audit-<YYYY-MM-DD>.md` (tell the
-user the exact path). Use the template below. Write the report in the **same
-language the user is using in the conversation** — the template labels below are
-the Chinese defaults; keep them Chinese if the user writes Chinese, otherwise
-translate the structure. Keep evidence concrete and quotes short. End by telling
+user the exact path). Use the template below.
+
+**Choose the report language by this precedence:**
+
+1. An explicit instruction in the user's request ("report in English",
+   "用中文出报告", "日本語で") — always wins.
+2. Otherwise, the language the user is writing in this conversation.
+3. Otherwise, the `Detected system language:` line from the discovery script's
+   `USER LOCALE` section.
+4. Otherwise, English.
+
+The discovery script only *suggests* the system language; the conversation
+language outranks it. Render the title, every label, status, band, and the
+org-level section in the chosen language using the **Report-label glossary**
+below — the Chinese template is the default rendering, not literal text, so
+translate the whole structure. Add one line at the very top of the report,
+`Report language: <lang> (chosen by <precedence reason>)`, for transparency.
+Keep evidence concrete and quotes short. End by telling
 the user the top 3 things to fix and offering to go deeper or help implement
 (implementation is out of scope for the audit itself).
 
@@ -207,6 +225,31 @@ test/lint 命令、非常规结构下的代码库地图>
 2. <第二项>
 3. <第三项>
 ```
+
+## Report-label glossary (render in the chosen language)
+
+The template above shows the 简体中文 default. Render every fixed label in the
+chosen language using this table. Traditional Chinese → 繁體中文 equivalents of
+the 简体中文 column; any language not listed → translate naturally from the
+English column.
+
+| Element | English | 简体中文 | 日本語 | 한국어 |
+|---|---|---|---|---|
+| Report title | Claude Code Engineering Compliance Audit | Claude Code 工程规范合规审计报告 | Claude Code エンジニアリング規範 監査レポート | Claude Code 엔지니어링 규범 감사 보고서 |
+| Audit target | Audit target | 审计项目 | 監査対象 | 감사 대상 |
+| Project profile | Project profile | 项目画像 | プロジェクト概要 | 프로젝트 개요 |
+| Audit date | Audit date | 审计日期 | 監査日 | 감사일 |
+| Reference standard | Reference standard | 对照标准 | 参照基準 | 기준 |
+| Overall score | Overall score | 总体评分 | 総合スコア | 총점 |
+| Score note | Score note | 评分说明 | スコアに関する注記 | 점수 설명 |
+| Summary | Summary | 摘要 | 概要 | 요약 |
+| Score overview | Score overview | 评分概览 | スコア一覧 | 점수 개요 |
+| Detailed findings | Detailed findings | 详细发现 | 詳細な指摘 | 상세 발견 |
+| Table headers | Category / Status / Key finding | 类别 / 状态 / 关键发现 | カテゴリ / 状態 / 主な指摘 | 범주 / 상태 / 핵심 발견 |
+| Status values | Compliant / Partial / Missing / N/A | 符合 / 部分 / 缺失 / 不适用 | 準拠 / 部分的 / 欠落 / 該当なし | 준수 / 부분 / 누락 / 해당 없음 |
+| Bands | Excellent / Good / Needs work / Early | 优秀 / 良好 / 需改进 / 起步 | 優秀 / 良好 / 要改善 / 初期 | 우수 / 양호 / 개선 필요 / 초기 |
+| Org-level section | Organizational items (a repo can't auto-verify; needs human confirmation) | 组织级事项(仓库无法自动检测,需人工确认) | 組織レベルの項目(リポジトリでは自動検証不可、要人手確認) | 조직 차원 항목(저장소 자동 검증 불가, 사람 확인 필요) |
+| Priority fixes | Priority fixes | 优先改进清单 | 優先改善リスト | 우선 개선 목록 |
 
 ## Notes on judgment
 
