@@ -95,9 +95,11 @@ once it runs, the audit is consistent.
 ## Not in scope
 
 - It reports; it doesn't fix. Ask separately if you want the changes made.
-- When CLAUDE.md is the weak spot (or the overall score is below 70), the
-  reply points you to Anthropic's official `claude-md-management` plugin as
-  an optional next step you run yourself — the audit itself stays read-only.
+- When the audit finds a gap an official Anthropic tool targets, the reply
+  points you to it as an optional next step you run yourself: the
+  `claude-md-management` plugin for a weak CLAUDE.md, a per-language LSP
+  plugin for weak code intelligence, or the `skill-creator` plugin for
+  missing skills. The audit itself installs nothing and stays read-only.
 - Org and governance items are advice for a human to confirm — a repo can't
   prove them.
 

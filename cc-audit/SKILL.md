@@ -142,38 +142,106 @@ Keep evidence concrete and quotes short. End by telling
 the user the top 3 things to fix and offering to go deeper or help implement
 (implementation is out of scope for the audit itself).
 
-### 6. When the audit lands poorly, point to the official CLAUDE.md plugin
+### 6. When the audit finds a gap an official Anthropic tool targets, point to it
 
-Still read-only: this skill never edits CLAUDE.md and never installs anything.
-But Anthropic ships an official, first-party plugin built for exactly the
-highest-weighted category here, so when the setup scores poorly, surface it as
-an opt-in next step the *user* chooses to run — the same way step 5 already
-offers to "help implement." It is `claude-md-management` from the
-`claude-plugins-official` marketplace (Anthropic-maintained, bundled with Claude
-Code by default — not a third-party marketplace); it audits and improves
-CLAUDE.md files.
+Still read-only: this skill never edits files and never installs anything. But
+Anthropic ships official, first-party tools built for some of the exact
+categories audited here. When the audit finds a real gap one of them targets,
+surface it as an opt-in next step the *user* chooses to run — the same opt-in
+framing as step 5's "help implement" offer, and like that offer it stays a
+conversational reply, never written into the report file.
 
-**When to offer.** In the conversational reply only — never written into the
-report file — after the report is saved, when **either** the CLAUDE.md category
-resolved to `⚠ Partial` or `✗ Missing`, **or** the overall score is below 70. If
-CLAUDE.md is `✓ Compliant` or `N/A` *and* the score is ≥70, do not offer it.
+**Shared rules — apply to every pointer below.**
 
-**What to say.** A short offer phrased as a question (mirroring the existing
-"want me to go deeper?" close), in the report/conversation language via the
-**Plugin follow-up offer** glossary row. Keep the `/plugin install …` command
-verbatim — never translate it. Calibrate honestly:
+- **Conversational reply only**, after the report is saved. Never write any of
+  these into the report file.
+- **Optional and user-run.** State explicitly that it's optional, that the
+  *user* installs/runs it themselves, and that the audit itself stays read-only.
+- **Official only.** Each is a plugin from the `claude-plugins-official`
+  marketplace (Anthropic-maintained, available by default in Claude Code) —
+  never third-party.
+- **Commands verbatim.** Keep every `/plugin install …` and `/skill-creator`
+  string exactly as written — never translate or paraphrase a command, even
+  when the surrounding offer is in another language. Plugin and binary names
+  are identifiers.
+- **Calibrate, never oversell.** Offer a tool *only* when the audit found the
+  specific gap it targets. A category that resolved to `✓` or `N/A` never
+  triggers its tool. Pitching a tool the audit didn't motivate trains the user
+  to ignore the report — the one failure mode this skill exists to avoid.
+- **One consolidated block, severity-ordered.** If more than one pointer fires,
+  present them together under a single short "Optional next steps you can run
+  yourself" close (mirroring the existing "want me to go deeper?" offer), in
+  the report/conversation language, ordered by the weight of the gap each
+  addresses (heaviest-weighted failing category first). When Pointer 1 fires
+  only on the overall-score condition (CLAUDE.md itself is `✓`/`N/A`), rank it
+  by the real failing categories, not CLAUDE.md's nominal weight — consistent
+  with its calibration note. Include only the pointers that actually fired —
+  never the full menu.
 
-- CLAUDE.md is the weak spot (`⚠`/`✗`): lead with the plugin — it targets the
-  exact, heaviest-weighted gap the audit found.
-- CLAUDE.md is `✓` or `N/A` and only the overall score is <70: lead with the
-  real weak categories from the priority list; mention the plugin only as
-  optional ongoing CLAUDE.md upkeep (and for `N/A`, only if a CLAUDE.md would
-  even help at this scale). Do not oversell a CLAUDE.md tool when CLAUDE.md is
-  not the problem — that trains the user to ignore the report, the one failure
-  mode this skill exists to avoid.
+**Pointer 1 — CLAUDE.md → `claude-md-management`.** Audits and improves
+CLAUDE.md files; targets the highest-weighted category here.
 
-Make explicit that it is optional, that the user installs/runs it themselves,
-and that the audit itself stays read-only.
+- *Fires when:* the CLAUDE.md category resolved to `⚠ Partial` or `✗ Missing`,
+  **or** the overall score is below 70. If CLAUDE.md is `✓ Compliant` or `N/A`
+  *and* the score is ≥70, it does not fire.
+- *Say it* via the **CLAUDE.md plugin offer** glossary row. Calibrate:
+  - CLAUDE.md is the weak spot (`⚠`/`✗`): lead with it — it targets the exact,
+    heaviest-weighted gap found.
+  - CLAUDE.md is `✓`/`N/A` and only the overall score is <70: lead with the
+    real weak categories from the priority list; mention this only as optional
+    ongoing CLAUDE.md upkeep (and for `N/A`, only if a CLAUDE.md would help at
+    this scale). Don't oversell a CLAUDE.md tool when CLAUDE.md isn't the
+    problem.
+
+**Pointer 2 — LSP / code intelligence → per-language LSP plugin.** Adds
+symbol-precise navigation (go-to-definition / find-references) at scale.
+
+- *Fires when:* the LSP / code intelligence category resolved to `⚠ Partial`
+  or `✗ Missing`. If it's `✓ Compliant` or `N/A`, it does not fire — `N/A`
+  here means text search is genuinely adequate at this scale, so an LSP pitch
+  would be exactly the noise this skill avoids.
+- *Say it* via the **LSP plugin offer** glossary row. Name the specific
+  plugin(s) for the repo's actual primary language(s) from the **Official LSP
+  plugin map** below, and state the user must also put the matching
+  language-server binary on `PATH` (the audit points; it installs neither). If
+  the main language isn't in the map, say the official marketplace carries the
+  rest as `*-lsp@claude-plugins-official` rather than guessing a name.
+
+**Pointer 3 — Skills → `skill-creator`.** An official plugin that scaffolds,
+edits, and evals skills; installs as
+`/plugin install skill-creator@claude-plugins-official`, then provides the
+`/skill-creator` command.
+
+- *Fires when:* the Skills category resolved to `⚠ Partial` or `✗ Missing`.
+  This covers both sub-cases: an obvious repeatable workflow with no skill, and
+  reusable domain knowledge crammed into CLAUDE.md that should be a skill — for
+  the latter, tie it to the CLAUDE.md finding (note the misplaced knowledge,
+  point at `skill-creator` to extract it). If Skills is `✓` or `N/A`, it does
+  not fire.
+- *Say it* via the **skill-creator offer** glossary row. Keep the
+  `/plugin install …` command verbatim, exactly as for Pointer 1.
+
+**Official LSP plugin map.** Language → plugin → required language-server
+binary; every plugin installs as
+`/plugin install <plugin>@claude-plugins-official`. Name only the row(s)
+matching the repo's primary language(s):
+
+| Language | Plugin | Required binary |
+|---|---|---|
+| C / C++ | `clangd-lsp` | `clangd` |
+| C# | `csharp-lsp` | `csharp-ls` |
+| Go | `gopls-lsp` | `gopls` |
+| Java | `jdtls-lsp` | `jdtls` |
+| Kotlin | `kotlin-lsp` | `kotlin-language-server` |
+| Lua | `lua-lsp` | `lua-language-server` |
+| PHP | `php-lsp` | `intelephense` |
+| Python | `pyright-lsp` | `pyright-langserver` |
+| Rust | `rust-analyzer-lsp` | `rust-analyzer` |
+| Swift | `swift-lsp` | `sourcekit-lsp` |
+| TypeScript / JavaScript | `typescript-lsp` | `typescript-language-server` |
+
+Languages not listed: the official marketplace carries additional `*-lsp`
+plugins — point the user there; do not invent a plugin name.
 
 ## Report template
 
@@ -283,7 +351,9 @@ English column.
 | Bands | Excellent / Good / Needs work / Early | 优秀 / 良好 / 需改进 / 起步 | 優秀 / 良好 / 要改善 / 初期 | 우수 / 양호 / 개선 필요 / 초기 |
 | Org-level section | Organizational items (a repo can't auto-verify; needs human confirmation) | 组织级事项(仓库无法自动检测,需人工确认) | 組織レベルの項目(リポジトリでは自動検証不可、要人手確認) | 조직 차원 항목(저장소 자동 검증 불가, 사람 확인 필요) |
 | Priority fixes | Priority fixes | 优先改进清单 | 優先改善リスト | 우선 개선 목록 |
-| Plugin follow-up offer (conversational reply, not in the report file) | Anthropic's official **claude-md-management** plugin audits and improves CLAUDE.md files. Optional, and you run it yourself — this audit stays read-only. Install: `/plugin install claude-md-management@claude-plugins-official` | Anthropic 官方 **claude-md-management** 插件可审计并改进 CLAUDE.md。可选,由你自行运行——本次审计保持只读。安装:`/plugin install claude-md-management@claude-plugins-official` | Anthropic 公式 **claude-md-management** プラグインは CLAUDE.md の監査と改善を行います。任意で、実行はご自身で——本監査は読み取り専用のままです。インストール:`/plugin install claude-md-management@claude-plugins-official` | Anthropic 공식 **claude-md-management** 플러그인은 CLAUDE.md 감사·개선을 수행합니다. 선택 사항이며 직접 실행합니다 — 이 감사는 읽기 전용을 유지합니다. 설치: `/plugin install claude-md-management@claude-plugins-official` |
+| CLAUDE.md plugin offer (conversational reply, not in the report file) | Anthropic's official **claude-md-management** plugin audits and improves CLAUDE.md files. Optional, and you run it yourself — this audit stays read-only. Install: `/plugin install claude-md-management@claude-plugins-official` | Anthropic 官方 **claude-md-management** 插件可审计并改进 CLAUDE.md。可选,由你自行运行——本次审计保持只读。安装:`/plugin install claude-md-management@claude-plugins-official` | Anthropic 公式 **claude-md-management** プラグインは CLAUDE.md の監査と改善を行います。任意で、実行はご自身で——本監査は読み取り専用のままです。インストール:`/plugin install claude-md-management@claude-plugins-official` | Anthropic 공식 **claude-md-management** 플러그인은 CLAUDE.md 감사·개선을 수행합니다. 선택 사항이며 직접 실행합니다 — 이 감사는 읽기 전용을 유지합니다. 설치: `/plugin install claude-md-management@claude-plugins-official` |
+| LSP plugin offer (conversational reply, not in the report file) | Anthropic's official per-language **LSP plugins** add symbol-precise navigation. Optional, and you run it yourself — this audit stays read-only. Install the one for your main language and put its language-server binary on PATH, e.g. `/plugin install pyright-lsp@claude-plugins-official` (Python; needs `pyright-langserver`) — see the Official LSP plugin map. | Anthropic 官方按语言提供的 **LSP 插件** 可带来符号级精确导航。可选,由你自行运行——本次审计保持只读。安装与主语言匹配的那个,并把对应语言服务器二进制加入 PATH,例如 `/plugin install pyright-lsp@claude-plugins-official`(Python,需 `pyright-langserver`)——见 Official LSP plugin map。 | Anthropic 公式の言語別 **LSP プラグイン** はシンボル単位の正確なナビゲーションを追加します。任意で、実行はご自身で——本監査は読み取り専用のままです。主要言語に合うものをインストールし、対応する言語サーバーのバイナリを PATH に追加してください。例:`/plugin install pyright-lsp@claude-plugins-official`(Python、`pyright-langserver` が必要)——Official LSP plugin map を参照。 | Anthropic 공식 언어별 **LSP 플러그인** 은 심볼 단위의 정확한 탐색을 추가합니다. 선택 사항이며 직접 실행합니다 — 이 감사는 읽기 전용을 유지합니다. 주 언어에 맞는 것을 설치하고 해당 언어 서버 바이너리를 PATH에 추가하세요. 예: `/plugin install pyright-lsp@claude-plugins-official` (Python, `pyright-langserver` 필요) — Official LSP plugin map 참조. |
+| skill-creator offer (conversational reply, not in the report file) | Anthropic's official **skill-creator** plugin scaffolds, edits, and evals skills — good for extracting reusable expertise that shouldn't live in CLAUDE.md. Optional, and you run it yourself — this audit stays read-only. Install: `/plugin install skill-creator@claude-plugins-official`, then use `/skill-creator`. | Anthropic 官方 **skill-creator** 插件可创建、修改并评测 skill——适合把不该留在 CLAUDE.md 的可复用专业知识抽出来。可选,由你自行运行——本次审计保持只读。安装:`/plugin install skill-creator@claude-plugins-official`,随后使用 `/skill-creator`。 | Anthropic 公式 **skill-creator** プラグインはスキルの作成・編集・評価を行います——CLAUDE.md に置くべきでない再利用可能な専門知識の切り出しに有用です。任意で、実行はご自身で——本監査は読み取り専用のままです。インストール:`/plugin install skill-creator@claude-plugins-official`、その後 `/skill-creator` を使用。 | Anthropic 공식 **skill-creator** 플러그인은 스킬을 생성·편집·평가합니다 — CLAUDE.md에 두면 안 되는 재사용 가능한 전문 지식을 분리하는 데 좋습니다. 선택 사항이며 직접 실행합니다 — 이 감사는 읽기 전용을 유지합니다. 설치: `/plugin install skill-creator@claude-plugins-official`, 이후 `/skill-creator` 사용. |
 
 ## Notes on judgment
 
